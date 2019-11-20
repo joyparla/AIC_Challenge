@@ -3,70 +3,129 @@ import java.util.*;
 import java.text.*;
 import java.math.*;
 import java.util.regex.*;
+import java.util.stream.Collectors;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+
 
 public class Solution2 {
     public static void main(String args[] ) throws Exception {
         
         Scanner sc = new Scanner(System.in);
+ 
+        Object obj = new JSONParser().parse(new FileReader("C:/WorkSpace/js.json")); 
 
-        String input = sc.nextLine();
+        JSONObject jo = (JSONObject) obj; 
+        
+        JSONArray report = (JSONArray)jo.get("reports");
+        
+        Solution2 solution2= new Solution2();
+          
 
-    final String     str    = JSType.toString(input);
-    final Global     global = Context.getGlobal();
-    final boolean    dualFields = ((ScriptObject) global).useDualFields();
-
-        JSONParser jp = new JSONParser(str, global, dualFields);
-
-        ReportGrade[] reportArray = (ReportGrade)jp.parse();
-
-        printRequiredReport(reportArray);
+        solution2.printRequiredReport(report, solution2);
     }
 
-    static void printRequiredReport(ReportGrade[] reportArray){
-
-
-         List<ReportGrade> myList = Arrays.asList(reportArray);
-
-
-         myList = myList.stream().filter(report -> Arrasys.asList(report.getSubject())
-         .stream().filter(subject -> !subject.getGrade().equals("F")).collect                                              (Collectors.toList())).collect(Collectors.toList());
-
-         Comparator<ReportGrade> compareByName = Comparator.comparing(ReportGrade::getSubject)
-         .thenComparing(ReportGrade::getEnrollment);
-
-         myList = myList.stream().sorted(compareByName).collect(Collectors.toList());
-
-
-
-
+     void printRequiredReport(JSONArray reports, Solution2 solution2){
+    	
+    	
+    	
+    	List<MySortClass> finalList = new ArrayList<MySortClass>();	
+    	for(int i =0 ;i<reports.size(); i++) {
+    		
+    		
+    		JSONObject repoGrad = ((JSONObject)reports.get(i));
+    		
+    		
+    		JSONArray subjArray = (JSONArray)repoGrad.get("subject");
+    		
+    		for(int j = 0;j<subjArray.size(); j++) {
+    			
+    			
+    			
+    			JSONObject subjG = ((JSONObject)subjArray.get(j));
+    			
+    			if(!subjG.get("grade").equals("F")) {
+            		
+            		Solution2.MySortClass mySortClass = solution2.new MySortClass();         		
+            		
+            		mySortClass.enrollment = (String)repoGrad.get("enrollment");
+            		
+            		mySortClass.name = (String)repoGrad.get("name");
+    				
+    				mySortClass.code = (String)subjG.get("code");
+    				
+    				mySortClass.grade = (String)subjG.get("grade");
+    				
+    				finalList.add(mySortClass);
+    						
+    			}
+    				
+    		}		
+    	} 	
+    	
+    	
+    	
+    	Collections.sort(finalList, solution2.new EnrollComp());
+    	
+    	finalList.stream().forEach(x -> System.out.println(x.code+ " "+ x.grade + " "+ x.enrollment+" " + x.name));
     }
+    
 
-    static class ReportGrade{
+     class ReportGrade{
 
         String enrollment;
 
         String name;
 
         Subject[] subject;
-
-        //setters and getters
-
-         
+        
 
     }
 
-    static class Subject {
+     class Subject {
 
         String code;
 
         String grade;
-        //setters and getters
-
+       
     }
+     
+     class MySortClass{
+    	 
+    	 String code;
+    	 
+    	 String grade;
+    	 
+    	 String enrollment;
+    	 
+    	 String name;
+     }
+     
 
-
-
-
-
+     
+     
+     class EnrollComp implements Comparator<MySortClass> 
+     {
+         public int compare(MySortClass o1, MySortClass o2) 
+         {
+        	 int result = o1.code.compareTo(o2.code);
+        	 
+             if(result == 0) {
+            	 
+            	 result = o1.grade.compareTo(o2.grade);
+            	 
+            	 if(result == 0) {
+            		 
+            		 return o1.enrollment.compareTo(o2.enrollment);
+            		 
+            	 }else
+            		 return result;
+             }else 
+            	 return result;
+            	 
+         }
+     }
 
 }
