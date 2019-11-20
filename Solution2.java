@@ -15,7 +15,7 @@ public class Solution2 {
         
         Scanner sc = new Scanner(System.in);
  
-        Object obj = new JSONParser().parse(new FileReader("C:/WorkSpace/js.json")); 
+        Object obj = new JSONParser().parse(sc.nextLine()); 
 
         JSONObject jo = (JSONObject) obj; 
         
